@@ -6,10 +6,6 @@
 
 **通过手机端语音输入实现电脑端远程输入的便捷工具**
 
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://www.microsoft.com/windows)
-
 </div>
 
 ## 📖 项目简介
