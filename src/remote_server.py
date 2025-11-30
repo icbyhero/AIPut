@@ -361,7 +361,7 @@ class ServerApp:
             )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
-            self.tip_label.config(text="")
+            self.tip_label.config(text="提示：切换到具体 IP 可显示二维码")
         else:
             # 生成并显示二维码
             url = f"http://{host_ip}:{port}"
@@ -398,7 +398,7 @@ class ServerApp:
             )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
-            self.tip_label.config(text="")
+            self.tip_label.config(text="提示：切换到具体 IP 可显示二维码")
         else:
             # 生成并显示二维码
             url = f"http://{host_ip}:{port}"
