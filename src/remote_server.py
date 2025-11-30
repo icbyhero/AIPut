@@ -295,9 +295,12 @@ class ServerApp:
         self.btn_start.pack(fill='x', pady=(0, 20))
 
         # 二维码显示区域
-        self.qr_label = tk.Label(main_frame, text="点击启动后在此处显示",
-                                 bg="#e6e6e6", fg="#888", width=30, height=12)
+        self.qr_label = tk.Label(main_frame, text="",
+                                 bg="#e6e6e6", fg="#333", width=30, height=12, font=("Arial", 9))
         self.qr_label.pack(pady=5)
+
+        # 初始显示所有可用地址
+        self.show_all_ips_display(5000)
 
         # 底部链接提示
         self.url_label = tk.Label(main_frame, text="", fg="blue", font=("Arial", 9, "underline"), cursor="hand2")
@@ -307,6 +310,28 @@ class ServerApp:
         # 提示信息
         self.tip_label = tk.Label(main_frame, text="", fg="#888", font=("Arial", 8))
         self.tip_label.pack(pady=(5, 0))
+
+    def show_all_ips_display(self, port, started=False):
+        """显示所有可用 IP 地址列表"""
+        all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
+        ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
+
+        if started:
+            # 已启动状态
+            title = "监听所有网卡"
+            tip = "💡 切换到具体 IP 可显示二维码"
+        else:
+            # 未启动状态
+            title = "可用地址"
+            tip = "💡 点击启动服务开始使用"
+
+        self.qr_label.config(
+            text=f"{title}\n\n{ip_list}\n\n{tip}",
+            image='',
+            bg="#e6e6e6",
+            fg="#333",
+            font=("Arial", 9)
+        )
 
     def run_flask(self, host, port):
         try:
@@ -354,15 +379,8 @@ class ServerApp:
         # 处理 "0.0.0.0 (所有网卡)" 的情况
         if host_ip.startswith('0.0.0.0'):
             # 显示所有可用的 IP 地址
+            self.show_all_ips_display(port, started=True)
             all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
-            ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
-            self.qr_label.config(
-                text=f"监听所有网卡\n\n可用地址：\n{ip_list}\n\n💡 切换到具体 IP 可显示二维码",
-                image='',
-                bg="#e6e6e6",
-                fg="#333",
-                font=("Arial", 9)
-            )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
             self.tip_label.config(text="")
@@ -391,15 +409,8 @@ class ServerApp:
         # 处理 "0.0.0.0 (所有网卡)" 的情况
         if host_ip.startswith('0.0.0.0'):
             # 显示所有可用的 IP 地址
+            self.show_all_ips_display(port, started=True)
             all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
-            ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
-            self.qr_label.config(
-                text=f"监听所有网卡\n\n可用地址：\n{ip_list}\n\n💡 切换到具体 IP 可显示二维码",
-                image='',
-                bg="#e6e6e6",
-                fg="#333",
-                font=("Arial", 9)
-            )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
             self.tip_label.config(text="")
