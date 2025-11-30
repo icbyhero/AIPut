@@ -303,8 +303,8 @@ class ServerApp:
         self.root.geometry("380x500")
         self.root.resizable(False, False)
 
-        # 绑定窗口关闭事件
-        self.root.protocol('WM_DELETE_WINDOW', self.hide_window)
+        # 绑定窗口关闭事件（正常退出）
+        self.root.protocol('WM_DELETE_WINDOW', self.quit_app)
 
         # 设置窗口图标
         try:
@@ -345,11 +345,21 @@ class ServerApp:
         self.port_entry = tk.Entry(main_frame, textvariable=self.port_var, font=("Arial", 10))
         self.port_entry.pack(fill='x', pady=(0, 15))
 
+        # 按钮组
+        button_frame = tk.Frame(main_frame)
+        button_frame.pack(fill='x', pady=(0, 20))
+
         # 启动按钮
-        self.btn_start = tk.Button(main_frame, text="启动服务", command=self.toggle_server,
+        self.btn_start = tk.Button(button_frame, text="启动服务", command=self.toggle_server,
                                    bg="#007AFF", fg="white", font=("Arial", 12, "bold"),
                                    relief="flat", pady=8, cursor="hand2")
-        self.btn_start.pack(fill='x', pady=(0, 20))
+        self.btn_start.pack(side='left', fill='x', expand=True, padx=(0, 5))
+
+        # 最小化到托盘按钮
+        self.btn_minimize = tk.Button(button_frame, text="🔽", command=self.hide_window,
+                                      bg="#8e8e93", fg="white", font=("Arial", 12, "bold"),
+                                      relief="flat", pady=8, cursor="hand2", width=3)
+        self.btn_minimize.pack(side='right')
 
         # 二维码显示区域
         self.qr_label = tk.Label(main_frame, text="",
