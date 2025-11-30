@@ -353,7 +353,7 @@ class ServerApp:
             all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
             ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
             self.qr_label.config(
-                text=f"监听所有网卡\n\n可用地址：\n{ip_list}",
+                text=f"监听所有网卡\n\n可用地址：\n{ip_list}\n\n💡 切换到具体 IP 可显示二维码",
                 image='',
                 bg="#e6e6e6",
                 fg="#333",
@@ -361,7 +361,7 @@ class ServerApp:
             )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
-            self.tip_label.config(text="提示：切换到具体 IP 可显示二维码")
+            self.tip_label.config(text="")
         else:
             # 生成并显示二维码
             url = f"http://{host_ip}:{port}"
@@ -390,7 +390,7 @@ class ServerApp:
             all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
             ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
             self.qr_label.config(
-                text=f"监听所有网卡\n\n可用地址：\n{ip_list}",
+                text=f"监听所有网卡\n\n可用地址：\n{ip_list}\n\n💡 切换到具体 IP 可显示二维码",
                 image='',
                 bg="#e6e6e6",
                 fg="#333",
@@ -398,7 +398,7 @@ class ServerApp:
             )
             self.url_label.config(text="请手动输入上方地址")
             self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
-            self.tip_label.config(text="提示：切换到具体 IP 可显示二维码")
+            self.tip_label.config(text="")
         else:
             # 生成并显示二维码
             url = f"http://{host_ip}:{port}"
