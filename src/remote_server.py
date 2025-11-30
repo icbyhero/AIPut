@@ -42,14 +42,22 @@ HTML_TEMPLATE = """
             transition: border-color 0.2s;
         }
         input[type="text"]:focus { border-color: #007AFF; }
-        button#sendBtn {
-            width: 100%; padding: 15px; font-size: 18px; color: white;
-            background-color: #007AFF; border: none; border-radius: 12px; 
-            cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,122,255,0.2);
+        .button-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        button {
+            flex: 1; padding: 15px; font-size: 18px; color: white;
+            border: none; border-radius: 12px; cursor: pointer; font-weight: 600;
             transition: background-color 0.1s, transform 0.1s;
         }
+        button#sendBtn {
+            background-color: #007AFF;
+            box-shadow: 0 4px 6px rgba(0,122,255,0.2);
+        }
         button#sendBtn:active { background-color: #0056b3; transform: scale(0.98); }
+        button#clearBtn {
+            background-color: #8e8e93;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button#clearBtn:active { background-color: #636366; transform: scale(0.98); }
         #status { margin-top: 10px; height: 20px; font-size: 14px; color: #34c759; font-weight: 500;}
         .history-container { margin-top: 30px; text-align: left; }
         .history-header { 
@@ -77,7 +85,10 @@ HTML_TEMPLATE = """
     <div class="input-group">
         <input type="text" id="textInput" placeholder="输入文字..." autofocus autocomplete="off">
     </div>
-    <button id="sendBtn" onclick="handleSend()">发送 (Ent)</button>
+    <div class="button-group">
+        <button id="clearBtn" onclick="handleClear()">清空</button>
+        <button id="sendBtn" onclick="handleSend()">发送 (Ent)</button>
+    </div>
     <div id="status"></div>
     <div class="history-container">
         <div class="history-header">
@@ -91,15 +102,34 @@ HTML_TEMPLATE = """
         const status = document.getElementById('status');
         const historyList = document.getElementById('historyList');
         const MAX_HISTORY = 10;
+
         window.onload = function() { renderHistory(); }
+
+        // 回车发送
         input.addEventListener("keypress", function(event) {
             if (event.key === "Enter") { event.preventDefault(); handleSend(); }
+        });
+
+        // 点击页面任意位置聚焦输入框（除了按钮和历史记录）
+        document.body.addEventListener('click', function(event) {
+            const target = event.target;
+            // 如果点击的不是按钮、历史记录项、清空按钮，则聚焦输入框
+            if (!target.closest('button') &&
+                !target.closest('.history-item') &&
+                !target.closest('.clear-btn') &&
+                target !== input) {
+                input.focus();
+            }
         });
         function handleSend() {
             const text = input.value.trim();
             if (!text) return;
             saveToHistory(text);
             sendRequest(text);
+        }
+        function handleClear() {
+            input.value = '';
+            input.focus();
         }
         function sendRequest(text) {
             status.innerText = "发送中...";
