@@ -281,6 +281,8 @@ class ServerApp:
         self.ip_combo = ttk.Combobox(main_frame, textvariable=self.ip_var,
                                      values=self.all_ips, font=("Arial", 10), state='normal')
         self.ip_combo.pack(fill='x', pady=(0, 10))
+        # 绑定 IP 改变事件
+        self.ip_combo.bind('<<ComboboxSelected>>', self.on_ip_changed)
 
         tk.Label(main_frame, text="端口 (Port):", font=("Arial", 10, "bold")).pack(anchor='w')
         tk.Entry(main_frame, textvariable=self.port_var, font=("Arial", 10)).pack(fill='x', pady=(0, 15))
@@ -334,14 +336,6 @@ class ServerApp:
         port = int(port_str)
         host_ip = self.ip_var.get()
 
-        # 处理 "0.0.0.0 (所有网卡)" 的情况
-        if host_ip.startswith('0.0.0.0'):
-            # 用于二维码显示的实际 IP
-            display_ip = get_host_ip()
-            url = f"http://{display_ip}:{port}"
-        else:
-            url = f"http://{host_ip}:{port}"
-
         # 启动 Flask 线程
         t = threading.Thread(target=self.run_flask, args=('0.0.0.0', port), daemon=True)
         t.start()
@@ -349,16 +343,67 @@ class ServerApp:
         self.is_running = True
         self.btn_start.config(text="停止服务", state='normal', bg="#ff3b30")
 
-        # 生成并显示二维码
-        try:
-            self.qr_img = self.generate_qr(url) # 必须保持引用，否则会被垃圾回收
-            self.qr_label.config(image=self.qr_img, width=200, height=200, bg="white")
-        except Exception as e:
-            self.qr_label.config(text=f"二维码生成失败\n{e}")
+        # 处理 "0.0.0.0 (所有网卡)" 的情况
+        if host_ip.startswith('0.0.0.0'):
+            # 显示所有可用的 IP 地址
+            all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
+            ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
+            self.qr_label.config(
+                text=f"监听所有网卡\n\n可用地址：\n{ip_list}",
+                image='',
+                bg="#e6e6e6",
+                fg="#333",
+                font=("Arial", 9)
+            )
+            self.url_label.config(text="请手动输入上方地址")
+            self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
+        else:
+            # 生成并显示二维码
+            url = f"http://{host_ip}:{port}"
+            try:
+                self.qr_img = self.generate_qr(url) # 必须保持引用，否则会被垃圾回收
+                self.qr_label.config(image=self.qr_img, width=200, height=200, bg="white", text='', font=("Arial", 10))
+            except Exception as e:
+                self.qr_label.config(text=f"二维码生成失败\n{e}")
 
-        # 显示文本链接
-        self.url_label.config(text=url)
-        self.current_url = url
+            # 显示文本链接
+            self.url_label.config(text=url)
+            self.current_url = url
+
+    def on_ip_changed(self, event=None):
+        """当 IP 改变时更新二维码"""
+        if not self.is_running:
+            return
+
+        host_ip = self.ip_var.get()
+        port = int(self.port_var.get())
+
+        # 处理 "0.0.0.0 (所有网卡)" 的情况
+        if host_ip.startswith('0.0.0.0'):
+            # 显示所有可用的 IP 地址
+            all_ips = [ip for ip in self.all_ips if not ip.startswith('0.0.0.0')]
+            ip_list = '\n'.join([f"http://{ip}:{port}" for ip in all_ips])
+            self.qr_label.config(
+                text=f"监听所有网卡\n\n可用地址：\n{ip_list}",
+                image='',
+                bg="#e6e6e6",
+                fg="#333",
+                font=("Arial", 9)
+            )
+            self.url_label.config(text="请手动输入上方地址")
+            self.current_url = f"http://{all_ips[0]}:{port}" if all_ips else ""
+        else:
+            # 生成并显示二维码
+            url = f"http://{host_ip}:{port}"
+            try:
+                self.qr_img = self.generate_qr(url)
+                self.qr_label.config(image=self.qr_img, width=200, height=200, bg="white", text='', font=("Arial", 10))
+            except Exception as e:
+                self.qr_label.config(text=f"二维码生成失败\n{e}")
+
+            # 显示文本链接
+            self.url_label.config(text=url)
+            self.current_url = url
 
     def open_browser(self, event):
         if hasattr(self, 'current_url'):
