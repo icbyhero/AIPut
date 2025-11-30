@@ -7,7 +7,7 @@
 
 <div align="center">
 
-![Demo](demo.png)
+<img src="demo.png" width="600" alt="Demo">
 
 **通过手机端语音输入实现电脑端远程输入的便捷工具**
 
