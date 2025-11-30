@@ -285,7 +285,8 @@ class ServerApp:
         self.ip_combo.bind('<<ComboboxSelected>>', self.on_ip_changed)
 
         tk.Label(main_frame, text="端口 (Port):", font=("Arial", 10, "bold")).pack(anchor='w')
-        tk.Entry(main_frame, textvariable=self.port_var, font=("Arial", 10)).pack(fill='x', pady=(0, 15))
+        self.port_entry = tk.Entry(main_frame, textvariable=self.port_var, font=("Arial", 10))
+        self.port_entry.pack(fill='x', pady=(0, 15))
 
         # 启动按钮
         self.btn_start = tk.Button(main_frame, text="启动服务并生成二维码", command=self.toggle_server, 
@@ -346,6 +347,9 @@ class ServerApp:
 
         self.is_running = True
         self.btn_start.config(text="停止服务", state='normal', bg="#ff3b30")
+
+        # 禁用端口输入框
+        self.port_entry.config(state='disabled', bg="#f0f0f0")
 
         # 处理 "0.0.0.0 (所有网卡)" 的情况
         if host_ip.startswith('0.0.0.0'):
