@@ -16,6 +16,7 @@ from pystray import MenuItem as item
 import os
 import sys
 import tempfile
+import ctypes
 
 # --- 资源路径处理 ---
 def get_icon_path():
@@ -207,7 +208,49 @@ HTML_TEMPLATE = """
 """
 
 IS_MAC = platform.system() == 'Darwin'
+IS_WINDOWS = platform.system() == 'Windows'
 PASTE_KEY = 'command' if IS_MAC else 'ctrl'
+
+# Windows API 常量
+if IS_WINDOWS:
+    VK_SHIFT = 0x10
+    VK_INSERT = 0x2D
+    KEYEVENTF_EXTENDEDKEY = 0x0001
+    KEYEVENTF_KEYUP = 0x0002
+    KEYEVENTF_SCANCODE = 0x0008
+    MAPVK_VK_TO_VSC = 0
+
+def send_shift_insert_windows():
+    """使用 Windows API 发送 Shift+Insert 组合键（使用扫描码，兼容终端）"""
+    if not IS_WINDOWS:
+        return False
+
+    try:
+        user32 = ctypes.windll.user32
+
+        # 获取扫描码（对于终端应用如 CMD/PowerShell 必须使用扫描码）
+        shift_scan = user32.MapVirtualKeyW(VK_SHIFT, MAPVK_VK_TO_VSC)
+        insert_scan = user32.MapVirtualKeyW(VK_INSERT, MAPVK_VK_TO_VSC)
+
+        # 按下 Shift（使用扫描码）
+        user32.keybd_event(VK_SHIFT, shift_scan, KEYEVENTF_SCANCODE, 0)
+        time.sleep(0.05)
+
+        # 按下 Insert（使用扫描码 + 扩展键标志）
+        user32.keybd_event(VK_INSERT, insert_scan, KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY, 0)
+        time.sleep(0.02)
+
+        # 释放 Insert（使用扫描码 + 扩展键标志）
+        user32.keybd_event(VK_INSERT, insert_scan, KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0)
+        time.sleep(0.02)
+
+        # 释放 Shift（使用扫描码）
+        user32.keybd_event(VK_SHIFT, shift_scan, KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP, 0)
+
+        return True
+    except Exception as e:
+        print(f"Windows API error: {e}")
+        return False
 
 @app.route('/')
 def index():
@@ -221,10 +264,21 @@ def type_text():
         if text:
             pyperclip.copy(text)
             time.sleep(0.1)
+
             # 使用 Shift+Insert 粘贴（兼容所有应用，包括终端）
-            pyautogui.hotkey('shift', 'insert')
+            if IS_WINDOWS:
+                # Windows: 使用 Windows API 直接发送键盘事件（解决子线程问题）
+                success = send_shift_insert_windows()
+                if not success:
+                    # 如果 Windows API 失败，回退到 pyautogui
+                    pyautogui.hotkey('shift', 'insert')
+            else:
+                # Mac/Linux: 使用 pyautogui
+                pyautogui.hotkey('shift', 'insert')
+
             return {'success': True}
-    except Exception:
+    except Exception as e:
+        print(f"Error in type_text: {e}")
         pass
     return {'success': False}
 
