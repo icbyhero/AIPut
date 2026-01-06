@@ -147,12 +147,31 @@ class PlatformDetector:
         """Detect macOS-specific capabilities."""
         capabilities = {}
 
-        # Check for macOS-specific features
+        # Check for Python modules
         capabilities['appkit_available'] = PlatformDetector._check_python_module('AppKit')
-        capabilities['pyobjus_available'] = PlatformDetector._check_python_module('PyObjC')
+        capabilities['quartz_available'] = PlatformDetector._check_python_module('Quartz')
         capabilities['pyautogui_available'] = PlatformDetector._check_python_module('pyautogui')
         capabilities['pystray_available'] = PlatformDetector._check_python_module('pystray')
         capabilities['pynput_available'] = PlatformDetector._check_python_module('pynput')
+
+        # Check for CLI tools
+        cli_tools = []
+        for tool in ['osascript', 'afplay', 'pbcopy', 'pbpaste']:
+            try:
+                result = os.system(f'which {tool} > /dev/null 2>&1')
+                if result == 0:
+                    cli_tools.append(tool)
+            except:
+                pass
+        capabilities['cli_tools'] = cli_tools
+
+        # Check accessibility permissions
+        try:
+            from ApplicationServices import AXIsProcessTrusted
+            capabilities['accessibility_enabled'] = AXIsProcessTrusted()
+        except Exception as e:
+            print(f"[DEBUG] 检查辅助功能权限失败: {e}")
+            capabilities['accessibility_enabled'] = False
 
         return capabilities
 

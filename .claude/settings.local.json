@@ -5,7 +5,9 @@
       "Bash(mkdir:*)",
       "Bash(openspec:*)",
       "Bash(./run-auto.sh:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
